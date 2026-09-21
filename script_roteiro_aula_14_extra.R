@@ -94,7 +94,7 @@ dados_aula14 <- dados_aula14 %>%  mutate(
 
 # Ao terminar a Tarefa 3 commit com a mensagem " script - tarefa 1 a 3" e envie para o repositório Aula_14_Extra
 
-# Tarefa 4: Criar o banco de dados BACO_AULA14_RJ, POR MUNICÍPIO, com as seguintes variáveis listadas abaixo. 
+# Tarefa 4: Criar o banco de dados BANCO_AULA14_RJ, POR MUNICÍPIO, com as seguintes variáveis listadas abaixo. 
 # Variáveis que se referem a medidas de posição e de dispersão devem ser calculadas sem considerar NAs
 
 # Atenção: a 1a linha do banco deve ser da UF 33
@@ -127,6 +127,60 @@ dados_aula14 <- dados_aula14 %>%  mutate(
 
 # Ao terminar a Tarefa 4 commit com a mensagem " script - tarefa 1 a 4" e envie para o repositório Aula_14_Extra
 
+calcular_indicadores <- function(df) {
+  df %>%
+    summarise(
+      ANO = 2025,
+      TVV = n(),
+      TVRC = sum(!is.na(MUNICIPIO) & 
+                   !is.na(SEXO_PROPRIETARIO) & 
+                   !is.na(IDADE_PROPRIETARIO) & 
+                   !is.na(TIPO_VEICULO) & 
+                   !is.na(VALOR_VEICULO)),
+      TVVF = sum(SEXO_PROPRIETARIO == "Feminino", na.rm = TRUE),
+      TVVM = sum(SEXO_PROPRIETARIO == "Masculino", na.rm = TRUE),
+      TVCF = sum(TIPO_VEICULO == "Carro" & SEXO_PROPRIETARIO == "Feminino", na.rm = TRUE),
+      TVCM = sum(TIPO_VEICULO == "Carro" & SEXO_PROPRIETARIO == "Masculino", na.rm = TRUE),
+      TVMF = sum(TIPO_VEICULO == "Moto"  & SEXO_PROPRIETARIO == "Feminino", na.rm = TRUE),
+      TVMM = sum(TIPO_VEICULO == "Moto"  & SEXO_PROPRIETARIO == "Masculino", na.rm = TRUE),
+      TVC_22_34 = sum(TIPO_VEICULO == "Carro" & IDADE_PROPRIETARIO >= 22 & IDADE_PROPRIETARIO <= 34, na.rm = TRUE),
+      TVC_35_45 = sum(TIPO_VEICULO == "Carro" & IDADE_PROPRIETARIO >= 35 & IDADE_PROPRIETARIO <= 45, na.rm = TRUE),
+      IMVCF    = mean(IDADE_PROPRIETARIO[TIPO_VEICULO == "Carro" & SEXO_PROPRIETARIO == "Feminino"], na.rm = TRUE),
+      DPVCF    = sd(IDADE_PROPRIETARIO[TIPO_VEICULO == "Carro" & SEXO_PROPRIETARIO == "Feminino"], na.rm = TRUE),
+      IVCF_P25 = quantile(IDADE_PROPRIETARIO[TIPO_VEICULO == "Carro" & SEXO_PROPRIETARIO == "Feminino"], 0.25, na.rm = TRUE, names = FALSE),
+      IVCF_P50 = quantile(IDADE_PROPRIETARIO[TIPO_VEICULO == "Carro" & SEXO_PROPRIETARIO == "Feminino"], 0.50, na.rm = TRUE, names = FALSE),
+      IVCF_P75 = quantile(IDADE_PROPRIETARIO[TIPO_VEICULO == "Carro" & SEXO_PROPRIETARIO == "Feminino"], 0.75, na.rm = TRUE, names = FALSE),
+      IMVMM    = mean(IDADE_PROPRIETARIO[TIPO_VEICULO == "Moto" & SEXO_PROPRIETARIO == "Masculino"], na.rm = TRUE),
+      DPVMM    = sd(IDADE_PROPRIETARIO[TIPO_VEICULO == "Moto" & SEXO_PROPRIETARIO == "Masculino"], na.rm = TRUE),
+      IVMM_P25 = quantile(IDADE_PROPRIETARIO[TIPO_VEICULO == "Moto" & SEXO_PROPRIETARIO == "Masculino"], 0.25, na.rm = TRUE, names = FALSE),
+      IVMM_P50 = quantile(IDADE_PROPRIETARIO[TIPO_VEICULO == "Moto" & SEXO_PROPRIETARIO == "Masculino"], 0.50, na.rm = TRUE, names = FALSE),
+      IVMM_P75 = quantile(IDADE_PROPRIETARIO[TIPO_VEICULO == "Moto" & SEXO_PROPRIETARIO == "Masculino"], 0.75, na.rm = TRUE, names = FALSE),
+      TPIC = sum(PAM == "PIC", na.rm = TRUE),
+      TAIC = sum(PAM == "AIC", na.rm = TRUE),
+      TGIC = sum(PAM == "GIC", na.rm = TRUE),
+      .groups = "drop"
+    )
+}
+
+df_uf <- dados_aula14 %>%
+  calcular_indicadores() %>%
+  mutate(
+    NIVEL = "UF",
+    CODIGO = "33",
+    .before = TVV
+  )
+
+df_mun <- dados_aula14 %>%
+  group_by(MUNICIPIO) %>%
+  calcular_indicadores() %>%
+  mutate(
+    NIVEL = "MUNICIPIO",
+    CODIGO = as.character(MUNICIPIO),
+    .before = TVV
+  ) %>%
+  select(-MUNICIPIO)
+
+BACO_AULA14_RJ <- bind_rows(df_uf, df_mun)
 
 # Tarefa 5: Exportar o banco de dados BANCO_AULA14_RJ com o nome BANCO_AULA14_RJ.csv
 
