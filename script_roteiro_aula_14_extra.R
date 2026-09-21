@@ -1,5 +1,5 @@
 ##### Atividade aula 14 - extra - banco 2 - equivalente ao SINASC ######
-##### Na branch main inserir os comandos e salvar o script com o nome script_aula_14_extra#####
+##### Na branch main inserir os comandos e salvar o script com o nome -m#####
 
 # Tarefa 1: Leitura do banco de dados banco 2 = SINASC.csv com o nome de dados_aula14
 # Ler o arquivo, verificar estrutura dos dados e dar uma olhada nos dados
@@ -64,13 +64,36 @@ F_IDADE = case_when(
 # Ao terminar a Tarefa 2 commit com a mensagem " script - tarefa 1 a 2" e envie para o repositório Aula_14_Extra
 
 # Tarefa 3: Leitura do banco de dados Tabela_PAM.csv (com o nome tabela_pam) e:
+
+tabela_pam <- read_delim(
+  file = "Tabela_PAM.csv", 
+  delim = ";", 
+  escape_double = FALSE, 
+  trim_ws = TRUE
+)
+
 # agregar ao banco dados_aula14 as informações de VALOR_P10 e VALOR_P90
+
+dados_aula14 <- dados_aula14 %>%
+  left_join(
+    tabela_pam %>% select(IDADE_PROPRIETARIO, SEXO_PROPRIETARIO, VALOR_P10, VALOR_P90),
+    by = c("IDADE_PROPRIETARIO", "SEXO_PROPRIETARIO")
+  ) 
+
 # criar a variável PAM (somente quando TIPO_VEICULO = "Carro"), de acordo com IDADE_PROPRIETARIO e SEXO_PROPRIETARIO, com as seguintes categorias:
 # PAM = "PIC", se VALOR_VEICULO < VALOR_P10; "AIC", se VALOR_P10 <= VALOR_VEICULO <= VALOR_P90; "GIC", se VALOR_VEICULO > VALOR_P90
 
+dados_aula14 <- dados_aula14 %>%  mutate(
+  PAM = case_when(
+    TIPO_VEICULO == "Carro" & VALOR_VEICULO < VALOR_P10 ~ "PIC",
+    TIPO_VEICULO == "Carro" & VALOR_VEICULO >= VALOR_P10 & VALOR_VEICULO <= VALOR_P90 ~ "AIC",
+    TIPO_VEICULO == "Carro" & VALOR_VEICULO > VALOR_P90 ~ "GIC",
+    TRUE ~ NA_character_
+  )
+)
+
 # Ao terminar a Tarefa 3 commit com a mensagem " script - tarefa 1 a 3" e envie para o repositório Aula_14_Extra
 
- 
 # Tarefa 4: Criar o banco de dados BACO_AULA14_RJ, POR MUNICÍPIO, com as seguintes variáveis listadas abaixo. 
 # Variáveis que se referem a medidas de posição e de dispersão devem ser calculadas sem considerar NAs
 
