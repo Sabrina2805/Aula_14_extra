@@ -27,11 +27,41 @@ summary(dados_aula14)
 
 # Tarefa 2: Manipulação dos dados
 # Padronizar as categorias SEXO_PROPRIETARIO para Masculino e Feminino
+
+library(stringr)
+
+dados_aula14 <- dados_aula14 %>%
+  mutate(
+   SEXO_PROPRIETARIO = str_trim(as.character(SEXO_PROPRIETARIO)),
+    
+    SEXO_PROPRIETARIO = case_when(
+      tolower(SEXO_PROPRIETARIO) %in% c("m", "masculino", "1") ~ "Masculino",
+      tolower(SEXO_PROPRIETARIO) %in% c("f", "feminino", "2")  ~ "Feminino",
+      TRUE ~ SEXO_PROPRIETARIO
+    )
+  )
+
 # Atribuir legendas para a variável TIPO_VEICULO, sendo 1: Carro e 2: Moto
+
+dados_aula14 <- dados_aula14 %>%
+  mutate(
+TIPO_VEICULO = case_when(
+  TIPO_VEICULO == 1 ~ "Carro",
+  TIPO_VEICULO == 2 ~ "Moto",
+  TRUE ~ as.character(TIPO_VEICULO)
+  ))
+
 # Criar uma nova variável em dados_aula14 F_IDADE categorizando as idades em: 22 a 34, 35 a 45
 
-# Ao terminar a Tarefa 2 commit com a mensagem " script - tarefa 1 a 2" e envie para o repositório Aula_14_Extra
+dados_aula14 <- dados_aula14 %>%
+  mutate(
+F_IDADE = case_when(
+  IDADE_PROPRIETARIO >= 22 & IDADE_PROPRIETARIO <= 34 ~ "22 a 34",
+  IDADE_PROPRIETARIO >= 35 & IDADE_PROPRIETARIO <= 45 ~ "35 a 45",
+  TRUE ~ NA_character_
+  ))
 
+# Ao terminar a Tarefa 2 commit com a mensagem " script - tarefa 1 a 2" e envie para o repositório Aula_14_Extra
 
 # Tarefa 3: Leitura do banco de dados Tabela_PAM.csv (com o nome tabela_pam) e:
 # agregar ao banco dados_aula14 as informações de VALOR_P10 e VALOR_P90
